@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>時間変換ツール</title>
+<style>
+  body { font-family: sans-serif; background: #f8f9fa; text-align: center; margin-top: 40px; }
+  input, button { padding: 10px; font-size: 1rem; margin: 5px; border-radius: 6px; border: 1px solid #ccc; }
+  button { cursor: pointer; background: #007bff; color: white; border: none; }
+  button:hover { background: #0056b3; }
+  #container { background: white; display: inline-block; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); min-width: 360px; }
+  h2, h3 { margin-bottom: 10px; }
+  hr { margin: 20px 0; border: none; border-top: 1px solid #ddd; }
+  #result { font-size: 1.2rem; color: #333; margin-top: 15px; word-wrap: break-word; }
+  #copyBtn { display: none; margin-top: 10px; background: #28a745; }
+  #copyBtn:hover { background: #1e7e34; }
+  #copiedMsg { color: green; font-size: 0.9rem; display: none; margin-top: 5px; }
+</style>
+</head>
+<body>
+<div id="container">
+  <h2>時間変換ツール</h2>
+
+  <!-- 秒 → 年・日・時・分・秒 -->
+  <div>
+    <h3>秒 → 年・日・時・分・秒</h3>
+    <input type="text" id="seconds" placeholder="秒を入力">
+    <button onclick="convertToTime()">変換</button>
+  </div>
+
+  <hr>
+
+  <!-- 年・日・時・分・秒 → 秒 -->
+  <div>
+    <h3>年・日・時・分・秒 → 秒</h3>
+    <input type="text" id="years" placeholder="年" style="width:60px">
+    <input type="text" id="days" placeholder="日" style="width:60px">
+    <input type="text" id="hours" placeholder="時" style="width:60px">
+    <input type="text" id="minutes" placeholder="分" style="width:60px">
+    <input type="text" id="secs" placeholder="秒" style="width:60px">
+    <button onclick="convertToSeconds()">変換</button>
+  </div>
+
+  <!-- 結果表示 -->
+  <div id="result"></div>
+  <button id="copyBtn" onclick="copyResult()">結果をコピー</button>
+  <div id="copiedMsg">コピーしました！</div>
+</div>
+
+<script>
+function convertToTime() {
+  const totalSecondsStr = document.getElementById("seconds").value.trim();
+  if (!/^\d+$/.test(totalSecondsStr)) {
+    document.getElementById("result").innerHTML = "正の整数を入力してください。";
+    document.getElementById("copyBtn").style.display = "none";
+    return;
+  }
+
+  let totalSeconds = BigInt(totalSecondsStr);
+
+  const year = totalSeconds / 31536000n;
+  totalSeconds %= 31536000n;
+  const day = totalSeconds / 86400n;
+  totalSeconds %= 86400n;
+  const hour = totalSeconds / 3600n;
+  totalSeconds %= 3600n;
+  const minute = totalSeconds / 60n;
+  const second = totalSeconds % 60n;
+
+  document.getElementById("result").innerHTML =
+    `${year}年 ${day}日 ${hour}時間 ${minute}分 ${second}秒`;
+  document.getElementById("copyBtn").style.display = "inline-block";
+  document.getElementById("copiedMsg").style.display = "none";
+}
+
+function convertToSeconds() {
+  const y = BigInt(parseInt(document.getElementById("years").value) || 0);
+  const d = BigInt(parseInt(document.getElementById("days").value) || 0);
+  const h = BigInt(parseInt(document.getElementById("hours").value) || 0);
+  const m = BigInt(parseInt(document.getElementById("minutes").value) || 0);
+  const s = BigInt(parseInt(document.getElementById("secs").value) || 0);
+
+  if (y < 0n || d < 0n || h < 0n || m < 0n || s < 0n) {
+    document.getElementById("result").innerHTML = "負の値は入力できません。";
+    document.getElementById("copyBtn").style.display = "none";
+    return;
+  }
+
+  const totalSeconds = y*31536000n + d*86400n + h*3600n + m*60n + s;
+  document.getElementById("result").innerHTML = `${totalSeconds} 秒`;
+  document.getElementById("copyBtn").style.display = "inline-block";
+  document.getElementById("copiedMsg").style.display = "none";
+}
+
+function copyResult() {
+  const text = document.getElementById("result").textContent;
+  if (text.trim() === "") return;
+  navigator.clipboard.writeText(text).then(() => {
+    const msg = document.getElementById("copiedMsg");
+    msg.style.display = "block";
+    setTimeout(() => msg.style.display = "none", 1500);
+  });
+}
+</script>
+</body>
+</html>
